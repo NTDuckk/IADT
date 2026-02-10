@@ -73,6 +73,33 @@ _C.MODEL.PROMPTSG.REWEIGHT_MODE = "mul_mean1"
 _C.MODEL.PROMPTSG.ATTN_POOL_MODE = "max"
 _C.MODEL.PROMPTSG.ENABLE_SUPCON_IN_SIMPLIFIED = False
 _C.MODEL.PROMPTSG.ATTN_MAP_MODE = "mean_head_mean_text_norm"
+# =========================
+# IADT (Decoupled Subject/Attribute Tokenization)
+# =========================
+_C.MODEL.PROMPTSG.ENABLE_IADT = False          # bật/tắt IADT
+_C.MODEL.PROMPTSG.IADT_ENABLED = False         # alias (nếu code có check tên cũ)
+
+_C.MODEL.PROMPTSG.IADT_NUM_QUERIES = 64        # số learnable queries (Q=64)
+_C.MODEL.PROMPTSG.IADT_TOPK = 16               # top-k attribute tokens (K=16)
+_C.MODEL.PROMPTSG.IADT_ATTR_PATCH_SOURCE = "proj"  # "proj" | "final" | "both"
+
+# Loss weights theo IADT
+_C.MODEL.PROMPTSG.IADT_LAMBDA_SUPCON = 0.1
+_C.MODEL.PROMPTSG.IADT_LAMBDA_ORTHO = 1.0
+
+# Attribute tokenizer internals (nếu bạn muốn config được)
+_C.MODEL.PROMPTSG.IADT_ATTR_LAYERS = 2
+_C.MODEL.PROMPTSG.IADT_ATTR_HEADS = 8
+_C.MODEL.PROMPTSG.IADT_ATTR_DROPOUT = 0.0
+
+# =========================
+# MIM / Cross-attn options
+# =========================
+_C.MODEL.PROMPTSG.INCLUDE_CLS_IN_KV = False    # KV = [CLS; patches]
+_C.MODEL.PROMPTSG.REWEIGHT_CLS = False         # reweight CLS theo attn_map
+_C.MODEL.PROMPTSG.ATTN_EPS = 1e-6              # tránh chia 0 khi normalize attn_map
+
+
 # -----------------------------------------------------------------------------
 # INPUT
 # -----------------------------------------------------------------------------

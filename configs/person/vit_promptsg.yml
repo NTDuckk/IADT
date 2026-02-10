@@ -4,17 +4,36 @@ MODEL:
   METRIC_LOSS_TYPE: 'triplet'
   IF_LABELSMOOTH: 'on'
   NO_MARGIN: False
+
   PROMPTSG:
-    LAMBDA_SUPCON: 0.5
-    PROMPT_MODE: 'composed'
+    # ===== PromptSG base =====
+    PROMPT_MODE: 'composed'          # train composed; inference có thể đổi simplified khi test
     TEMPERATURE: 0.1
+    LAMBDA_SUPCON: 0.5               # giữ lại (PromptSG). IADT sẽ override bằng IADT_LAMBDA_SUPCON bên dưới
+
     CROSS_ATTN_HEADS: 8
     POST_CA_BLOCKS: 2
-    COATTN_TEXT_MODE: "full"     # "full" | "eot"
-    COATTN_LAYERS: 2             # số layer co-attn (paper 2 thường >2, PromptSG default 2)
-    REWEIGHT_MODE: "mul_mean1"   # giữ giống PromptSG
-    ENABLE_SUPCON_IN_SIMPLIFIED: false  # PromptSG paper: inference simplified, train composed
+    COATTN_TEXT_MODE: "full"         # "full" | "eot"
+    COATTN_LAYERS: 2                 # (nếu code chưa dùng thì để vẫn ok)
+    REWEIGHT_MODE: "mul_mean1"
+    ENABLE_SUPCON_IN_SIMPLIFIED: false
     ATTN_POOL_MODE: "max"
+    ATTN_MAP_MODE: "mean_head_mean_text_norm"   # code MIM bạn có dùng
+
+    # ===== IADT enable =====
+    ENABLE_IADT: true                # bật nhánh IADT (S* + A*)
+    IADT_NUM_QUERIES: 64             # số lượng learnable queries X
+    IADT_TOPK: 16                    # chọn top-k attribute tokens
+    IADT_ATTR_PATCH_SOURCE: "both"   # "proj" | "final" | "both"
+
+    # ===== IADT losses =====
+    IADT_LAMBDA_SUPCON: 0.1          # theo paper IADT (override LAMBDA_SUPCON)
+    IADT_LAMBDA_ORTHO: 1.0           # weight cho L_ortho
+
+    # ===== IADT/MIM details =====
+    INCLUDE_CLS_IN_KV: true          # KV = [CLS; patches] giống IADT
+    REWEIGHT_CLS: true               # cho phép reweight CLS token
+
 INPUT:
   SIZE_TRAIN: [256, 128]
   SIZE_TEST: [256, 128]
@@ -32,6 +51,7 @@ DATALOADER:
 SOLVER:
   SEED: 1234
   MARGIN: 0.3
+
   PROMPTSG:
     IMS_PER_BATCH: 64
     OPTIMIZER_NAME: 'Adam'
@@ -57,4 +77,5 @@ TEST:
 DATASETS:
   NAMES: ('market1501')
   ROOT_DIR: datasets/dataset
-OUTPUT_DIR: ('logs/promptsg_market_vit/')
+
+OUTPUT_DIR: ('logs/promptsg_market_vit_iadt/')
