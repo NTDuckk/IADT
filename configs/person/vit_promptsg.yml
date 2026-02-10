@@ -1,0 +1,60 @@
+MODEL:
+  NAME: 'ViT-B-16'
+  STRIDE_SIZE: [16, 16]
+  METRIC_LOSS_TYPE: 'triplet'
+  IF_LABELSMOOTH: 'on'
+  NO_MARGIN: False
+  PROMPTSG:
+    LAMBDA_SUPCON: 0.5
+    PROMPT_MODE: 'composed'
+    TEMPERATURE: 0.1
+    CROSS_ATTN_HEADS: 8
+    POST_CA_BLOCKS: 2
+    COATTN_TEXT_MODE: "full"     # "full" | "eot"
+    COATTN_LAYERS: 2             # số layer co-attn (paper 2 thường >2, PromptSG default 2)
+    REWEIGHT_MODE: "mul_mean1"   # giữ giống PromptSG
+    ENABLE_SUPCON_IN_SIMPLIFIED: false  # PromptSG paper: inference simplified, train composed
+    ATTN_POOL_MODE: "max"
+INPUT:
+  SIZE_TRAIN: [256, 128]
+  SIZE_TEST: [256, 128]
+  PROB: 0.5
+  RE_PROB: 0.5
+  PADDING: 10
+  PIXEL_MEAN: [0.5, 0.5, 0.5]
+  PIXEL_STD: [0.5, 0.5, 0.5]
+
+DATALOADER:
+  SAMPLER: 'softmax_triplet'
+  NUM_INSTANCE: 4
+  NUM_WORKERS: 8
+
+SOLVER:
+  SEED: 1234
+  MARGIN: 0.3
+  PROMPTSG:
+    IMS_PER_BATCH: 64
+    OPTIMIZER_NAME: 'Adam'
+    MAX_EPOCHS: 60
+    BASE_LR_VISUAL: 0.000005
+    BASE_LR_NEW: 0.00005
+    WEIGHT_DECAY: 0.0001
+    STEPS: [20, 40]
+    GAMMA: 0.1
+    CHECKPOINT_PERIOD: 5
+    LOG_PERIOD: 50
+    EVAL_PERIOD: 5
+    WARMUP_EPOCHS: 0
+    WARMUP_LR_INIT: 0.0
+
+TEST:
+  IMS_PER_BATCH: 64
+  RE_RANKING: False
+  WEIGHT: ''
+  NECK_FEAT: 'after'
+  FEAT_NORM: 'yes'
+
+DATASETS:
+  NAMES: ('market1501')
+  ROOT_DIR: datasets/dataset
+OUTPUT_DIR: ('logs/promptsg_market_vit/')
